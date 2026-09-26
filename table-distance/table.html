@@ -1,0 +1,789 @@
+<title>Table de l'Entaille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,700;1,400&family=Alegreya+Sans+SC:wght@500;700&family=Marcellus+SC&display=swap">
+<style>
+  /* Même matière que l'Atlas de l'Entaille : l'ardoise gravée, un seul thème, couleurs explicites. */
+  :root {
+    color-scheme: dark;
+    --pierre: #22262A;
+    --pierre-2: #2C3136;
+    --pierre-3: #3B4147;
+    --brut: #1A1D20;
+    --gravure: #DDD7C9;
+    --gravure-2: #A7A8A1;
+    --gravure-3: #8A8F88;
+    --or: #C9A646;
+    --or-vif: #E6C86F;
+    --mousse: #A3B57E;
+    --braise: #D98C6F;
+    --f-display: "Marcellus SC", "Trajan Pro", Georgia, serif;
+    --f-texte: "Alegreya", Georgia, "Times New Roman", serif;
+    --f-label: "Alegreya Sans SC", "Gill Sans", "Segoe UI", system-ui, sans-serif;
+  }
+  html, body { background: var(--pierre); }
+  body {
+    color: var(--gravure);
+    font-family: var(--f-texte);
+    font-size: 18px;
+    line-height: 1.6;
+    padding-inline: 16px;
+    padding-block: 0 56px;
+  }
+  .page { max-width: 680px; margin-inline: auto; display: grid; gap: 26px; padding-top: 22px; }
+
+  /* En-tête */
+  .tete { display: grid; gap: 4px; padding-top: 24px; }
+  .surtitre { font: 500 13px/1.3 var(--f-label); letter-spacing: .14em; color: var(--gravure-2); margin: 0; }
+  h1 {
+    font-family: var(--f-display); font-weight: 400; margin: 0;
+    font-size: clamp(28px, 7vw, 40px); line-height: 1.08; letter-spacing: .03em;
+    text-wrap: balance; text-shadow: 0 -1px 0 #0E1012, 0 1px 0 #3d434a;
+  }
+  .reperes { margin: 0; font: 500 14px/1.4 var(--f-label); letter-spacing: .06em; color: var(--gravure-2); font-variant-numeric: tabular-nums; }
+
+  /* Barre d'état, collée en haut pendant la lecture */
+  .statut {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    margin-inline: -16px; padding: 10px 16px;
+    background: var(--pierre); border-bottom: 1px solid var(--pierre-3);
+  }
+  .statut-in { max-width: 680px; margin-inline: auto; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+  .pastille {
+    font: 700 13px/1 var(--f-label); letter-spacing: .1em; border-radius: 999px;
+    padding: 7px 12px; border: 1px solid var(--pierre-3); color: var(--gravure-2);
+    display: inline-flex; gap: 8px; align-items: center; white-space: nowrap;
+  }
+  .pastille[data-etat="toi"] { background: var(--or); border-color: var(--or); color: var(--brut); }
+  .pastille[data-etat="ouvert"] { border-color: var(--or); color: var(--or-vif); }
+  .pastille[data-etat="mj"] { border-color: var(--gravure-2); color: var(--gravure); }
+  .pastille[data-etat="mj"]::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--or-vif);
+    animation: souffle 1.6s ease-in-out infinite;
+  }
+  @keyframes souffle { 50% { opacity: .25; } }
+  .consigne { margin: 0; font-size: 16px; color: var(--gravure-2); flex: 1 1 200px; min-width: 0; }
+
+  h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; letter-spacing: .03em; margin: 0; text-wrap: balance; }
+  .etiquette { font: 700 12px/1.3 var(--f-label); letter-spacing: .14em; color: var(--gravure-2); margin: 0; }
+  section { display: grid; gap: 12px; min-width: 0; }
+  .note { margin: 0; font-size: 16px; color: var(--gravure-2); }
+  .vide { margin: 0; color: var(--gravure-2); font-style: italic; }
+
+  /* Le dernier tour : le texte d'abord, sans cadre */
+  .recit { font-size: 19px; line-height: 1.65; overflow-wrap: break-word; }
+  .recit > :first-child { margin-top: 0; }
+  .recit > :last-child { margin-bottom: 0; }
+  .recit p { margin: 0 0 .9em; max-width: 65ch; }
+  .recit em { color: var(--gravure); }
+  .recit strong { color: var(--or-vif); font-weight: 700; }
+  .recit blockquote { margin: .6em 0; padding: 2px 14px; border-left: 2px solid var(--or); color: var(--gravure-2); }
+  .recit h3, .recit h4 { font: 700 13px/1.3 var(--f-label); letter-spacing: .12em; color: var(--gravure-2); margin: 1.2em 0 .4em; }
+  .recit ul, .recit ol { padding-left: 1.2em; margin: 0 0 .9em; }
+  .recit .tableau { overflow-x: auto; }
+  .recit table { border-collapse: collapse; font-size: 16px; }
+  .recit th, .recit td { border-bottom: 1px solid var(--pierre-3); padding: 5px 9px; text-align: left; }
+  .mecanique {
+    margin: 0; padding-top: 10px; border-top: 1px solid var(--pierre-3);
+    font: 500 15px/1.45 var(--f-label); letter-spacing: .03em; color: var(--gravure-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* L'action : le seul bloc qui se détache */
+  .action {
+    background: var(--pierre-2); border: 1px solid var(--pierre-3); border-top: 3px solid var(--or);
+    border-radius: 4px; padding: 16px; display: grid; gap: 12px;
+  }
+  .action label { font: 700 13px/1.3 var(--f-label); letter-spacing: .1em; color: var(--or-vif); }
+  textarea, select {
+    font: 18px/1.5 var(--f-texte); color: var(--gravure); background: var(--pierre);
+    border: 1px solid var(--pierre-3); border-radius: 3px; padding: 10px 12px; width: 100%; box-sizing: border-box;
+  }
+  textarea { min-height: 130px; resize: vertical; }
+  textarea:focus, select:focus { outline: 2px solid var(--or-vif); outline-offset: 1px; }
+  .boutons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button {
+    font: 700 15px/1 var(--f-label); letter-spacing: .08em; cursor: pointer; border-radius: 3px;
+    padding: 13px 18px; border: 1px solid transparent;
+  }
+  button:focus-visible, summary:focus-visible { outline: 2px solid var(--or-vif); outline-offset: 2px; }
+  .principal { background: var(--or); color: var(--brut); flex: 1 1 180px; }
+  .secondaire { background: none; color: var(--gravure); border-color: var(--pierre-3); }
+  .secondaire:hover { border-color: var(--gravure-3); }
+  button:disabled { opacity: .45; cursor: default; }
+  .retour { margin: 0; font-size: 16px; color: var(--gravure-2); min-height: 1.4em; }
+  .retour[data-ton="ok"] { color: var(--mousse); }
+  .retour[data-ton="erreur"] { color: var(--braise); }
+
+  /* Billets : le pli cacheté */
+  .billets { display: grid; gap: 12px; }
+  .billet {
+    position: relative; background: var(--brut); border: 1px dashed var(--or);
+    border-radius: 3px; padding: 14px 16px 14px 52px; display: grid; gap: 6px;
+  }
+  .billet::before {
+    content: ""; position: absolute; left: 14px; top: 16px; width: 24px; height: 24px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #d9795f, #9c3f2c 70%);
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,.25);
+  }
+  .billet-tete { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; justify-content: space-between; }
+  .billet-tete b { font: 700 12px/1.3 var(--f-label); letter-spacing: .12em; color: var(--or-vif); }
+  .billet-tete span { font: 500 13px/1.3 var(--f-label); color: var(--gravure-3); font-variant-numeric: tabular-nums; }
+  .billet .recit { font-size: 17px; }
+  .nouveau { font: 700 11px/1 var(--f-label); letter-spacing: .12em; color: var(--brut); background: var(--or-vif); border-radius: 999px; padding: 4px 7px; }
+
+  /* Ce que déclarent les autres */
+  .declarations { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .declarations li { display: grid; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid var(--pierre-3); }
+  .declarations li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .declarations b { font-family: var(--f-display); font-weight: 400; font-size: 17px; color: var(--or-vif); }
+  .declarations p { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+  .declarations small { font: 500 13px/1.3 var(--f-label); color: var(--gravure-3); }
+
+  /* Fiche */
+  .tablettes { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .tablette {
+    background: var(--pierre-2); border: 1px solid var(--pierre-3); border-radius: 3px;
+    display: grid; justify-items: center; gap: 2px; padding: 10px 6px 8px; text-align: center;
+    box-shadow: inset 0 1px 0 #454c53, inset 0 -2px 6px rgba(0,0,0,.35);
+  }
+  .tablette b { font: 700 11px/1.2 var(--f-label); letter-spacing: .12em; color: var(--gravure-2); }
+  .tablette strong { font: 400 24px/1.15 var(--f-display); color: var(--gravure); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+  /* Tours précédents, message privé */
+  details { border-top: 1px solid var(--pierre-3); padding-top: 10px; }
+  summary { cursor: pointer; font: 700 13px/1.4 var(--f-label); letter-spacing: .1em; color: var(--gravure-2); }
+  summary:hover { color: var(--gravure); }
+  details[open] > summary { margin-bottom: 10px; }
+  .fil { display: grid; gap: 14px; }
+  .fil details { border-top: 0; padding-top: 0; }
+
+  /* Choix du personnage, vue du MJ */
+  .cadre { background: var(--pierre-2); border: 1px solid var(--pierre-3); border-radius: 4px; padding: 16px; display: grid; gap: 12px; }
+  .troupe { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .troupe li { display: grid; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--pierre-3); }
+  .troupe li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .troupe .nom { font-family: var(--f-display); font-size: 18px; }
+  .troupe .qui { font-size: 15px; color: var(--gravure-2); }
+  .troupe .lien { font: 500 14px/1.4 var(--f-label); letter-spacing: .03em; color: var(--gravure-2); }
+  .troupe .lien strong { color: var(--mousse); font-weight: 700; }
+  .troupe button { padding: 9px 12px; font-size: 13px; }
+  .troupe .principal { flex: 0 0 auto; }
+
+  .aide ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+  .aide li { max-width: 62ch; }
+  .pied { font-size: 14px; color: var(--gravure-3); margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) { .pastille[data-etat="mj"]::before { animation: none; } }
+</style>
+
+<header class="tete">
+  <p class="surtitre">Le Monde de l'Entaille · table à distance</p>
+  <h1 id="campagne">La table</h1>
+  <p class="reperes" id="reperes">En attente de la page…</p>
+</header>
+
+<div class="statut" role="status" aria-live="polite">
+  <div class="statut-in">
+    <span class="pastille" id="pastille" data-etat="fermee">Connexion…</span>
+    <p class="consigne" id="consigne"></p>
+  </div>
+</div>
+
+<main class="page">
+
+  <section id="s-acces" hidden>
+    <div class="cadre">
+      <h2 id="acces-titre">Cette page ne s'ouvre que dans Claude</h2>
+      <p class="note" id="acces-texte">Ouvre le lien de l'invitation sur claude.ai, connecté avec l'adresse e-mail qui l'a reçue.</p>
+    </div>
+  </section>
+
+  <section id="s-choix" hidden aria-labelledby="choix-titre">
+    <div class="cadre">
+      <h2 id="choix-titre">Qui joues-tu ?</h2>
+      <p class="note">Choisis ton personnage une fois pour toutes. Alex confirmera, puis la page s'ouvrira sur ta partie.</p>
+      <label class="etiquette" for="f-perso">Ton personnage</label>
+      <select id="f-perso"></select>
+      <div class="boutons"><button class="principal" id="b-choisir" type="button">C'est moi</button></div>
+      <p class="retour" id="r-choix" role="status"></p>
+    </div>
+  </section>
+
+  <section id="s-attente" hidden>
+    <div class="cadre">
+      <h2 id="attente-titre">Alex doit confirmer</h2>
+      <p class="note" id="attente-texte"></p>
+      <div class="boutons"><button class="secondaire" id="b-changer" type="button">Changer de personnage</button></div>
+    </div>
+  </section>
+
+  <section id="s-tour" aria-labelledby="tour-titre">
+    <p class="etiquette" id="tour-titre">Dernier tour</p>
+    <div class="recit" id="tour-texte"><p class="vide">Le premier tour apparaîtra ici quand la séance commencera.</p></div>
+    <p class="mecanique" id="tour-meca" hidden></p>
+  </section>
+
+  <section id="s-billets" hidden aria-labelledby="billets-titre">
+    <h2 id="billets-titre">Tes billets</h2>
+    <p class="note">Toi seul les vois. Ce qu'ils disent, ton personnage est le seul à le savoir.</p>
+    <div class="billets" id="billets"></div>
+  </section>
+
+  <section id="s-action" hidden aria-labelledby="action-titre">
+    <form class="action" id="form-action" novalidate>
+      <h2 id="action-titre">À toi</h2>
+      <label for="f-action" id="action-label">Ce que fait ton personnage</label>
+      <textarea id="f-action" maxlength="4000" placeholder="Écris comme tu le dirais à voix haute. « Je fouille le chariot pendant que Nobel fait le guet. »"></textarea>
+      <div class="boutons">
+        <button class="principal" id="b-envoyer" type="submit">Envoyer au MJ</button>
+        <button class="secondaire" id="b-passer" type="button">Je passe ce tour</button>
+      </div>
+      <p class="retour" id="r-action" role="status"></p>
+    </form>
+  </section>
+
+  <section id="s-autres" hidden aria-labelledby="autres-titre">
+    <p class="etiquette" id="autres-titre">Ce que la table a déclaré ce tour</p>
+    <ul class="declarations" id="declarations"></ul>
+  </section>
+
+  <section id="s-fiche" hidden aria-labelledby="fiche-titre">
+    <h2 id="fiche-titre">Ta fiche</h2>
+    <div class="tablettes" id="fiche-chiffres"></div>
+    <div class="recit" id="fiche-texte"></div>
+    <p class="pied" id="fiche-maj"></p>
+  </section>
+
+  <section id="s-fil" hidden>
+    <details id="d-fil">
+      <summary id="fil-titre">Les tours précédents</summary>
+      <div class="fil" id="fil"></div>
+    </details>
+  </section>
+
+  <section id="s-prive" hidden>
+    <details id="d-prive">
+      <summary>Dire quelque chose au MJ seul</summary>
+      <form class="action" id="form-prive" novalidate>
+        <label for="f-prive">Message que personne d'autre ne lira</label>
+        <textarea id="f-prive" maxlength="4000" placeholder="Une question, une action discrète, un secret de ton personnage."></textarea>
+        <div class="boutons"><button class="principal" id="b-prive" type="submit">Envoyer au MJ seul</button></div>
+        <p class="retour" id="r-prive" role="status"></p>
+      </form>
+    </details>
+  </section>
+
+  <section id="s-mj" hidden aria-labelledby="mj-titre">
+    <div class="cadre">
+      <h2 id="mj-titre">Vue du MJ</h2>
+      <p class="note">Cette page est la tienne. Les billets et les messages privés des joueurs ne s'affichent jamais ici, parce que tu joues aussi.</p>
+      <p class="etiquette">Qui joue qui</p>
+      <ul class="troupe" id="troupe"></ul>
+      <p class="retour" id="r-mj" role="status"></p>
+    </div>
+  </section>
+
+  <section id="s-aide" class="aide" hidden aria-labelledby="aide-titre">
+    <p class="etiquette" id="aide-titre">Comment jouer</p>
+    <ol>
+      <li>Lis le dernier tour, en haut de la page.</li>
+      <li>Quand la barre dit que c'est à toi, écris ce que fait ton personnage et appuie sur « Envoyer au MJ ».</li>
+      <li>Attends le tour suivant. Il s'affiche tout seul, inutile de recharger la page.</li>
+    </ol>
+    <p class="pied">Tu peux corriger ton action et la renvoyer tant que le MJ n'a pas joué le tour.</p>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const TITRE = "Table de l'Entaille";
+  const VUS = new Set((lit_("billets-vus") || "").split(",").filter(Boolean));
+  function lit_(cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } }
+
+  const S = {
+    db: null, user: null, uid: null, owner: false, erreur: null, pret: false,
+    etat: null, troupe: null, recit: [], decl: new Map(), joueurs: new Map(),
+    billets: [], fiche: null, ficheDe: null, stopFiche: null, prive: null,
+    noms: {}, dernierVu: null,
+  };
+
+  // ---------- petites aides ----------
+  function stocke(cle, val) { try { if (val == null) localStorage.removeItem(cle); else localStorage.setItem(cle, val); } catch (e) {} }
+  function lit(cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } }
+
+  function markdown(el, texte) {
+    el.replaceChildren();
+    if (!texte) return;
+    if (window.marked && window.DOMPurify) {
+      el.innerHTML = DOMPurify.sanitize(marked.parse(String(texte)));
+      el.querySelectorAll("table").forEach((t) => {
+        const w = document.createElement("div"); w.className = "tableau";
+        t.replaceWith(w); w.appendChild(t);
+      });
+    } else {
+      String(texte).split(/\n{2,}/).forEach((bloc) => {
+        const p = document.createElement("p"); p.textContent = bloc; el.appendChild(p);
+      });
+    }
+  }
+
+  function heure(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function reperesTour(seance, tour) {
+    const parts = [];
+    if (seance != null) parts.push("séance " + seance);
+    if (tour != null) parts.push(tour === 0 ? "ouverture" : "tour " + tour);
+    return parts.join(", ");
+  }
+
+  const persos = () => (S.troupe && Array.isArray(S.troupe.persos) ? S.troupe.persos : []);
+  const persoParId = (id) => persos().find((p) => p.id === id) || null;
+  const monPerso = () => (S.uid ? persos().find((p) => p.uid === S.uid) || null : null);
+  const maDemande = () => (S.uid ? (S.joueurs.get(S.uid) || {}).perso || null : null);
+  const tourOuvert = () => !!S.etat && S.etat.statut === "declarations";
+
+  // ---------- rendu ----------
+  function rendreEntete() {
+    const e = S.etat || {};
+    $("campagne").textContent = e.campagne || (S.troupe && S.troupe.campagne) || "La table";
+    const bits = [];
+    const rt = reperesTour(e.seance, e.tour);
+    if (rt) bits.push(rt.charAt(0).toUpperCase() + rt.slice(1));
+    if (e.date_db) bits.push(e.date_db);
+    $("reperes").textContent = bits.join(" · ") || (S.pret ? "Aucune séance ouverte pour l'instant" : "En attente de la page…");
+
+    const pastille = $("pastille");
+    const moi = monPerso();
+    let etat = "fermee", texte = "Pas de séance en cours";
+    if (!S.pret && !S.erreur) { texte = "Connexion…"; }
+    else if (S.erreur) { texte = "Page indisponible"; }
+    else if (e.statut === "declarations") {
+      const attendu = moi && Array.isArray(e.main_a) && e.main_a.includes(moi.id);
+      etat = attendu ? "toi" : "ouvert";
+      texte = attendu ? "À toi, " + moi.nom.split(" ")[0] : "Tour ouvert";
+    } else if (e.statut === "mj") { etat = "mj"; texte = "Le MJ raconte"; }
+    else if (e.statut === "pause") { etat = "pause"; texte = "Partie en pause"; }
+    pastille.dataset.etat = etat;
+    pastille.textContent = texte;
+    $("consigne").textContent = S.erreur ? "" : (e.consigne || "");
+  }
+
+  function rendreAcces() {
+    const s = $("s-acces");
+    if (S.erreur === "hors-claude") {
+      $("acces-titre").textContent = "Cette page ne s'ouvre que dans Claude";
+      $("acces-texte").textContent = "Ouvre le lien de l'invitation sur claude.ai, connecté avec l'adresse e-mail qui l'a reçue.";
+      s.hidden = false;
+    } else if (S.pret && !S.owner && !S.uid) {
+      $("acces-titre").textContent = "Ton compte n'est pas reconnu ici";
+      $("acces-texte").textContent = "Tu peux lire le récit, mais pas encore jouer. Demande à Alex de t'inviter par e-mail comme Éditeur, puis rouvre la page.";
+      s.hidden = false;
+    } else s.hidden = true;
+  }
+
+  function rendreChoix() {
+    const joueur = S.pret && !S.owner && !!S.uid;
+    const moi = monPerso();
+    const demande = maDemande();
+    const libres = persos().filter((p) => !p.uid || p.uid === S.uid);
+    $("s-choix").hidden = !(joueur && !moi && !demande);
+    $("s-attente").hidden = !(joueur && !moi && !!demande);
+    if (!$("s-choix").hidden) {
+      const sel = $("f-perso");
+      const signature = libres.map((p) => p.id).join(",");
+      if (sel.dataset.signature !== signature) {
+      sel.dataset.signature = signature;
+      const courant = sel.value;
+      const opts = libres.map((p) => {
+        const o = document.createElement("option");
+        o.value = p.id; o.textContent = p.nom + (p.qui ? " (" + p.qui + ")" : "");
+        return o;
+      });
+      if (!opts.length) {
+        const o = document.createElement("option"); o.value = ""; o.textContent = "Aucun personnage libre pour l'instant";
+        opts.push(o);
+      }
+      sel.replaceChildren(...opts);
+      if (courant && libres.some((p) => p.id === courant)) sel.value = courant;
+      }
+      $("b-choisir").disabled = !libres.length;
+    }
+    if (!$("s-attente").hidden) {
+      const p = persoParId(demande);
+      $("attente-texte").textContent = "Tu as choisi " + (p ? p.nom : "un personnage") +
+        ". Dès qu'Alex confirme, ta fiche et le bouton pour jouer apparaissent ici. Pas besoin de recharger.";
+    }
+  }
+
+  function rendreTour() {
+    const dernier = S.recit[0];
+    const el = $("tour-texte");
+    if (!dernier) {
+      el.replaceChildren();
+      const p = document.createElement("p"); p.className = "vide";
+      p.textContent = S.pret ? "Le premier tour apparaîtra ici quand la séance commencera." : "Chargement du récit…";
+      el.appendChild(p);
+      $("tour-meca").hidden = true;
+      $("tour-titre").textContent = "Dernier tour";
+      return;
+    }
+    $("tour-titre").textContent = "Dernier tour · " + reperesTour(dernier.seance, dernier.tour);
+    markdown(el, dernier.texte);
+    $("tour-meca").hidden = !dernier.mecanique;
+    $("tour-meca").textContent = dernier.mecanique || "";
+  }
+
+  function rendreFil() {
+    const anciens = S.recit.slice(1);
+    $("s-fil").hidden = !anciens.length;
+    if (!anciens.length) return;
+    $("fil-titre").textContent = "Les tours précédents (" + anciens.length + ")";
+    const fil = $("fil");
+    const ouverts = new Set([...fil.querySelectorAll("details[open]")].map((d) => d.dataset.id));
+    fil.replaceChildren(...anciens.map((t) => {
+      const d = document.createElement("details");
+      d.dataset.id = t.id;
+      if (ouverts.has(t.id)) d.open = true;
+      const s = document.createElement("summary");
+      s.textContent = reperesTour(t.seance, t.tour).replace(/^./, (c) => c.toUpperCase());
+      const corps = document.createElement("div"); corps.className = "recit";
+      markdown(corps, t.texte);
+      d.append(s, corps);
+      if (t.mecanique) { const m = document.createElement("p"); m.className = "mecanique"; m.textContent = t.mecanique; d.appendChild(m); }
+      return d;
+    }));
+  }
+
+  function rendreBillets() {
+    const moi = monPerso();
+    const montrer = !S.owner && !!moi && S.billets.length > 0;
+    $("s-billets").hidden = !montrer;
+    if (!montrer) return;
+    $("billets").replaceChildren(...S.billets.map((b) => {
+      const art = document.createElement("article"); art.className = "billet";
+      const tete = document.createElement("div"); tete.className = "billet-tete";
+      const t = document.createElement("b"); t.textContent = "Billet pour " + moi.nom.split(" ")[0];
+      const q = document.createElement("span"); q.textContent = reperesTour(b.seance, b.tour);
+      if (!VUS.has(b.id)) { const n = document.createElement("span"); n.className = "nouveau"; n.textContent = "Nouveau"; tete.append(t, n, q); }
+      else tete.append(t, q);
+      const corps = document.createElement("div"); corps.className = "recit";
+      markdown(corps, b.texte);
+      art.append(tete, corps);
+      return art;
+    }));
+    // Le badge « Nouveau » reste pendant la visite ; à la suivante, ces billets sont connus.
+    stocke("billets-vus", [...new Set([...VUS, ...S.billets.map((b) => b.id)])].join(","));
+  }
+
+  function rendreAction() {
+    const moi = monPerso();
+    const montrer = !S.owner && !!moi;
+    $("s-action").hidden = !montrer;
+    $("s-prive").hidden = !montrer;
+    if (!montrer) return;
+    const prenom = moi.nom.split(" ")[0];
+    $("action-label").textContent = "Ce que fait " + prenom;
+    const e = S.etat || {};
+    const attendu = Array.isArray(e.main_a) && e.main_a.includes(moi.id);
+    $("action-titre").textContent = tourOuvert() ? (attendu ? "À toi, " + prenom : "Ton action") : "Ton action";
+    const ouvert = tourOuvert();
+    $("b-envoyer").disabled = !ouvert;
+    $("b-passer").disabled = !ouvert;
+    const r = $("r-action");
+    const mienne = S.decl.get(S.uid);
+    const dejaEnvoyee = mienne && mienne.seance === e.seance && mienne.tour === e.tour;
+    if (Date.now() < (Number(r.dataset.jusqua) || 0)) return; // un message d'envoi reste affiché quelques secondes
+    if (!ouvert) {
+      r.dataset.ton = "";
+      r.textContent = e.statut === "mj" ? "Le MJ joue le tour. Ton brouillon est gardé, tu pourras l'envoyer au tour suivant."
+        : e.statut === "pause" ? "La partie est en pause."
+        : "Aucun tour ouvert pour l'instant.";
+    } else if (dejaEnvoyee) {
+      r.dataset.ton = "ok";
+      r.textContent = "Envoyé à " + heure(mienne.envoye_le) + ". Tu peux corriger et renvoyer tant que le MJ n'a pas joué le tour.";
+    } else {
+      r.dataset.ton = "";
+      r.textContent = attendu ? "Le MJ attend ton action." : "Tu peux agir ce tour si tu le veux.";
+    }
+  }
+
+  function rendreAutres() {
+    const e = S.etat || {};
+    const lignes = [];
+    for (const [uid, d] of S.decl) {
+      if (!d || d.seance !== e.seance || d.tour !== e.tour) continue;
+      const p = persos().find((x) => x.uid === uid && x.id === d.perso);
+      if (!p) continue; // une déclaration ne compte que si le joueur est confirmé sur ce personnage
+      lignes.push({ p, d, moi: uid === S.uid });
+    }
+    const montrer = S.pret && !!S.etat && S.etat.statut !== "fermee" && lignes.length > 0;
+    $("s-autres").hidden = !montrer;
+    if (!montrer) return;
+    lignes.sort((a, b) => String(a.d.envoye_le).localeCompare(String(b.d.envoye_le)));
+    $("declarations").replaceChildren(...lignes.map(({ p, d, moi }) => {
+      const li = document.createElement("li");
+      const b = document.createElement("b"); b.textContent = p.nom + (moi ? " (toi)" : "");
+      const t = document.createElement("p"); t.textContent = d.texte;
+      const s = document.createElement("small"); s.textContent = "à " + heure(d.envoye_le);
+      li.append(b, t, s);
+      return li;
+    }));
+  }
+
+  function rendreFiche() {
+    const moi = monPerso();
+    const f = S.fiche;
+    const montrer = !S.owner && !!moi && !!f;
+    $("s-fiche").hidden = !montrer;
+    if (!montrer) return;
+    $("fiche-titre").textContent = "Fiche de " + (f.nom || moi.nom);
+    const ch = f.chiffres && typeof f.chiffres === "object" ? Object.entries(f.chiffres) : [];
+    $("fiche-chiffres").hidden = !ch.length;
+    $("fiche-chiffres").replaceChildren(...ch.map(([k, v]) => {
+      const d = document.createElement("div"); d.className = "tablette";
+      const b = document.createElement("b"); b.textContent = k;
+      const s = document.createElement("strong"); s.textContent = String(v);
+      d.append(b, s);
+      return d;
+    }));
+    markdown($("fiche-texte"), f.md || "");
+    $("fiche-maj").textContent = f.maj ? "Mise à jour par le MJ à " + heure(f.maj) + "." : "";
+  }
+
+  async function rendreMJ() {
+    $("s-mj").hidden = !(S.pret && S.owner);
+    if ($("s-mj").hidden) return;
+    const jeton = (S.jetonMJ = (S.jetonMJ || 0) + 1);
+    const liste = persos();
+    const ids = new Set();
+    liste.forEach((p) => p.uid && ids.add(p.uid));
+    S.joueurs.forEach((_, uid) => ids.add(uid));
+    if (S.user && ids.size) {
+      try { S.noms = await S.user.profiles([...ids]); } catch (e) {}
+      if (jeton !== S.jetonMJ) return; // un rendu plus récent a pris la main
+    }
+    const nom = (uid) => (S.noms[uid] && S.noms[uid].name) || "un joueur invité";
+    const ul = $("troupe");
+    if (!liste.length) {
+      const li = document.createElement("li"); li.className = "vide";
+      li.textContent = "Aucun personnage. Claude remplit cette liste à l'ouverture de la séance.";
+      ul.replaceChildren(li);
+      return;
+    }
+    ul.replaceChildren(...liste.map((p) => {
+      const li = document.createElement("li");
+      const n = document.createElement("span"); n.className = "nom"; n.textContent = p.nom;
+      const q = document.createElement("span"); q.className = "qui"; q.textContent = p.qui || "";
+      li.append(n, q);
+      if (p.uid) {
+        const l = document.createElement("span"); l.className = "lien";
+        l.append("Joué à distance par ");
+        const s = document.createElement("strong"); s.textContent = nom(p.uid); l.append(s);
+        const b = document.createElement("button"); b.type = "button"; b.className = "secondaire"; b.textContent = "Libérer";
+        b.addEventListener("click", () => attribuer(p.id, null));
+        const box = document.createElement("div"); box.className = "boutons"; box.append(l, b);
+        li.append(box);
+      }
+      const demandes = [...S.joueurs].filter(([uid, j]) => j && j.perso === p.id && uid !== p.uid);
+      demandes.forEach(([uid]) => {
+        const l = document.createElement("span"); l.className = "lien";
+        l.textContent = nom(uid) + " demande à jouer ce personnage.";
+        const b = document.createElement("button"); b.type = "button"; b.className = "principal"; b.textContent = "Confirmer";
+        b.addEventListener("click", () => attribuer(p.id, uid));
+        const box = document.createElement("div"); box.className = "boutons"; box.append(l, b);
+        li.append(box);
+      });
+      if (!p.uid && !demandes.length) {
+        const l = document.createElement("span"); l.className = "lien"; l.textContent = "Joué à la table, ou pas encore réclamé.";
+        li.append(l);
+      }
+      return li;
+    }));
+  }
+
+  function renderTout() {
+    rendreEntete(); rendreAcces(); rendreChoix(); rendreTour(); rendreBillets();
+    rendreAction(); rendreAutres(); rendreFiche(); rendreFil(); rendreMJ();
+    $("s-aide").hidden = !(S.pret && !S.owner && !!monPerso());
+  }
+
+  // ---------- écritures ----------
+  async function attribuer(persoId, uid) {
+    const r = $("r-mj");
+    try {
+      const liste = persos().map((p) => {
+        if (p.id === persoId) return { ...p, uid: uid };
+        if (uid && p.uid === uid) return { ...p, uid: null }; // un joueur ne tient qu'un personnage
+        return { ...p };
+      });
+      await S.db.doc("table/troupe").update({ persos: liste });
+      r.dataset.ton = "ok";
+      r.textContent = uid ? "Confirmé." : "Personnage libéré.";
+    } catch (e) {
+      r.dataset.ton = "erreur";
+      r.textContent = "La modification n'est pas passée. Recharge la page et réessaie.";
+    }
+  }
+
+  function retenir(el, ton, texte) {
+    el.dataset.ton = ton; el.textContent = texte; el.dataset.jusqua = String(Date.now() + 8000);
+  }
+
+  function messageRefus(e) {
+    return e && e.code === "invalid_argument"
+      ? "Envoi refusé : ton invitation ne permet pas d'écrire. Alex doit t'inviter comme Éditeur, sans lien de partage."
+      : "L'envoi n'est pas passé. Vérifie ta connexion et réessaie.";
+  }
+
+  $("b-choisir").addEventListener("click", async () => {
+    const id = $("f-perso").value;
+    const r = $("r-choix");
+    if (!id) return;
+    $("b-choisir").disabled = true;
+    try {
+      await S.db.doc("joueurs/" + S.uid).set({ perso: id, choisi_le: new Date().toISOString() });
+      r.textContent = "";
+    } catch (e) {
+      r.dataset.ton = "erreur"; r.textContent = messageRefus(e);
+    } finally { $("b-choisir").disabled = false; }
+  });
+
+  $("b-changer").addEventListener("click", async () => {
+    try { await S.db.doc("joueurs/" + S.uid).delete(); } catch (e) {}
+  });
+
+  async function envoyerAction(texte) {
+    const moi = monPerso();
+    const e = S.etat || {};
+    const r = $("r-action");
+    if (!moi || !tourOuvert()) return;
+    texte = texte.trim();
+    if (!texte) { retenir(r, "erreur", "Écris d'abord ce que fait ton personnage."); return; }
+    $("b-envoyer").disabled = true; $("b-passer").disabled = true;
+    try {
+      await S.db.doc("declarations/" + S.uid).set({
+        perso: moi.id, seance: e.seance ?? null, tour: e.tour ?? null, texte, envoye_le: new Date().toISOString(),
+      });
+      stocke("brouillon", null);
+      r.dataset.jusqua = "";
+    } catch (err) {
+      retenir(r, "erreur", messageRefus(err));
+    } finally { rendreAction(); }
+  }
+
+  $("form-action").addEventListener("submit", (ev) => { ev.preventDefault(); envoyerAction($("f-action").value); });
+  $("b-passer").addEventListener("click", () => envoyerAction("(Je passe ce tour.)"));
+
+  let minuteur = null;
+  $("f-action").addEventListener("input", () => {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(() => stocke("brouillon", $("f-action").value), 400);
+  });
+
+  $("form-prive").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const moi = monPerso();
+    const e = S.etat || {};
+    const r = $("r-prive");
+    const texte = $("f-prive").value.trim();
+    if (!moi || !texte) return;
+    $("b-prive").disabled = true;
+    try {
+      await S.db.doc("prives/" + S.uid).set({
+        perso: moi.id, seance: e.seance ?? null, tour: e.tour ?? null, texte, envoye_le: new Date().toISOString(),
+      });
+      $("f-prive").value = "";
+      r.dataset.ton = "ok"; r.textContent = "Envoyé au MJ à " + heure(new Date().toISOString()) + ". Un nouveau message remplace le précédent.";
+    } catch (err) {
+      r.dataset.ton = "erreur"; r.textContent = messageRefus(err);
+    } finally { $("b-prive").disabled = false; }
+  });
+
+  // ---------- abonnements ----------
+  function surErreur(e) {
+    if (e && e.code === "revoked") { S.erreur = "hors-claude"; renderTout(); }
+  }
+
+  function suivreFiche() {
+    const moi = monPerso();
+    const id = moi && !S.owner ? moi.id : null;
+    if (id === S.ficheDe) return;
+    if (S.stopFiche) { S.stopFiche(); S.stopFiche = null; }
+    S.ficheDe = id; S.fiche = null;
+    if (!id) return;
+    S.stopFiche = S.db.doc("fiches/" + id).onSnapshot((s) => { S.fiche = s.exists ? s.data() : null; renderTout(); }, surErreur);
+  }
+
+  function signalerNouveau() {
+    const dernier = S.recit[0];
+    if (!dernier) return;
+    if (S.dernierVu && S.dernierVu !== dernier.id && document.hidden) document.title = "● " + TITRE;
+    S.dernierVu = dernier.id;
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) { document.title = TITRE; garderEcran(); }
+  });
+
+  function abonner() {
+    const db = S.db;
+    db.doc("table/etat").onSnapshot((s) => { S.etat = s.exists ? s.data() : null; renderTout(); }, surErreur);
+    db.doc("table/troupe").onSnapshot((s) => { S.troupe = s.exists ? s.data() : null; suivreFiche(); renderTout(); }, surErreur);
+    db.collection("recit").orderBy("n", "desc").limit(60).onSnapshot((q) => {
+      S.recit = q.docs.map((d) => ({ id: d.id, ...d.data() }));
+      signalerNouveau(); renderTout();
+    }, surErreur);
+    db.collection("declarations").onSnapshot((q) => {
+      S.decl = new Map(q.docs.map((d) => [d.id, d.data()])); renderTout();
+    }, surErreur);
+    db.collection("joueurs").onSnapshot((q) => {
+      S.joueurs = new Map(q.docs.map((d) => [d.id, d.data()])); renderTout();
+    }, surErreur);
+    if (S.uid && !S.owner) {
+      db.collection("billets/" + S.uid + "/liste").orderBy("n", "desc").limit(40).onSnapshot((q) => {
+        S.billets = q.docs.map((d) => ({ id: d.id, ...d.data() })); renderTout();
+      }, surErreur);
+    }
+  }
+
+  // Écran allumé pendant la partie, quand le téléphone l'accepte.
+  let verrouEcran = null;
+  async function garderEcran() {
+    try {
+      if (!navigator.wakeLock || document.hidden || (verrouEcran && !verrouEcran.released)) return;
+      verrouEcran = await navigator.wakeLock.request("screen");
+    } catch (e) {}
+  }
+  document.addEventListener("pointerdown", garderEcran, { once: true });
+
+  // ---------- démarrage ----------
+  const brouillon = lit("brouillon");
+  if (brouillon) $("f-action").value = brouillon;
+  renderTout();
+
+  async function demarrer() {
+    const C = window.claude;
+    if (!C || typeof C.use !== "function") { S.erreur = "hors-claude"; renderTout(); return; }
+    const [db, user] = await Promise.all([C.use("db"), C.use("user")]);
+    if (!db) { S.erreur = "hors-claude"; renderTout(); return; }
+    S.db = db; S.user = user;
+    if (user) {
+      const me = await user.me();
+      S.uid = me.id; S.owner = !!me.isOwner;
+    }
+    S.pret = true;
+    abonner();
+    renderTout();
+  }
+  demarrer();
+})();
+</script>
