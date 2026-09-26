@@ -29,9 +29,10 @@ Il ne voit jamais les billets ni les messages privés, parce qu'il joue aussi.
 2. Envoie-lui le message ci-dessous.
 3. Quand il a choisi son personnage, ouvre la page. Dans « Vue du MJ », appuie sur
    **Confirmer** en face de son nom.
-4. Ajoute le protocole à la compétence `maitre-du-jeu` : copie `protocole-mj.md` dans
-   `references/table-a-distance.md`, ajoute la ligne du tableau § 8, empaquette en `.zip`
-   sous le même nom et réimporte (voir plus bas).
+4. Importe les deux compétences mises à jour, prêtes dans `competences/`
+   (`maitre-du-jeu.zip`, `monde-entaille.zip`) : Personnaliser → Compétences → Ajouter →
+   Importer, « Téléverser et remplacer ». Range aussi les deux `.zip` dans
+   `jdr/_competences/`.
 5. Mets à jour `campagnes/les-cendres-de-valdreth/table.md`, section « Comment se déroule
    une séance » : qui joue à distance, par la page, et comment lui passent les billets.
 6. Fais un essai avant la vraie séance. Il choisit son personnage, tu confirmes, Claude
@@ -66,7 +67,8 @@ simple pour un débutant : aucune conversation Claude, un seul bouton.
 
 ## Modifications des compétences
 
-Dans `maitre-du-jeu/SKILL.md`, tableau § 8, ajouter :
+Déjà faites dans les deux `.zip` de `competences/`, construits à partir des versions
+installées le 26/09/2026. Pour mémoire, dans `maitre-du-jeu/SKILL.md`, tableau § 8, ajouter :
 
 ```
 | Un personnage joué à distance, par la page de table | `references/table-a-distance.md` |
@@ -104,3 +106,5 @@ Importer, « Téléverser et remplacer ».
 - `table.html` : la source de la page publiée.
 - `protocole-mj.md` : ce que Claude fait, côté Alex, à chaque séance avec un joueur à
   distance.
+- `competences/` : `maitre-du-jeu.zip` (avec `references/table-a-distance.md`) et
+  `monde-entaille.zip`, prêts à importer.
